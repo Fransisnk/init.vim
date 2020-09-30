@@ -6,26 +6,27 @@ set rtp+=~/.config/nvim/bundle/Vundle.vim
 let mapleader = ","
 set ts=4 sw=4 " tab to 4 spaces
 map <F12> :tabedit $MYVIMRC<CR>
-
+imap <F12> :tabedit $MYVIMRC<CR>
+let g:skip_loading_mswin = 1
+" /usr/share/nvim/runtime/mswin.vim
 call vundle#begin()            " required
 Plugin 'VundleVim/Vundle.vim'  " required
 Plugin 'arcticicestudio/nord-vim'
 Plugin 'preservim/nerdtree'
 Plugin 'vim-airline/vim-airline'
+Plugin 'tpope/vim-fugitive'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'ekalinin/Dockerfile.vim'
+Plugin 'SirVer/ultisnips'
+Plugin 'honza/vim-snippets'
 "Plugin 'file:///~/.vim/bundle/sampleplugin'
 Plugin 'ycm-core/YouCompleteMe'
+Plugin 'davidhalter/jedi-vim'
 Plugin 'machakann/vim-sandwich'
 Plugin 'jiangmiao/auto-pairs'
-"Plugin 'deoplete-plugins/deoplete-jedi'
-"Plugin 'davidhalter/jedi-vim'
 Plugin 'petobens/poet-v'
-"if has('nvim')
-  "Plugin 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePluginins' }
-"else
-  "Plugin 'Shougo/deoplete.nvim'
-  "Plugin 'roxma/nvim-yarp'
-  "Plugin 'roxma/vim-hug-neovim-rpc'
-"endif
+Plugin 'vim-python/python-syntax'
+Plugin 'dense-analysis/ale'
 call vundle#end()               " required
 filetype plugin indent on       " required
 
@@ -34,19 +35,20 @@ filetype plugin indent on       " required
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set termguicolors
 set cursorline
-:colorscheme nord
 let g:nord_cursor_line_number_background = 1
 let g:nord_uniform_diff_background = 1
+let g:python_highlight_all = 1
+:colorscheme nord
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Filesystem
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 map <F2> :NERDTreeToggle<CR>
-
+let g:NERDTreeMapOpenSplit = 's'
+let g:NERDTreeMapOpenVSplit = 'v'
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Movements
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" ALT Movement
 :tnoremap <A-h> <C-\><C-N><C-w>h
 :tnoremap <A-j> <C-\><C-N><C-w>j
 :tnoremap <A-k> <C-\><C-N><C-w>k
@@ -67,47 +69,45 @@ set splitright
 set splitbelow
 
 map <F10> :split term://bash<CR>i
+noremap <silent> <C-h> :vertical resize +3<CR>
+noremap <silent> <C-l> :vertical resize -3<CR>
+noremap <silent> <C-j> :resize +3<CR>
+noremap <silent> <C-k> :resize -3<CR>
+:nnoremap <A-s-h> :topleft vsplit
+:nnoremap <A-s-j> :botright split
+:nnoremap <A-s-k> :topleft split
+:nnoremap <A-s-l> :botright vsplit
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Other
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n> " Remap Esc from terminal
-let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
-let g:sandwich#recipes += [
-      \   {
-      \     'buns'        : ['{', '}'],
-      \     'motionwise'  : ['line'],
-      \     'kind'        : ['add'],
-      \     'linewise'    : 1,
-      \     'command'     : ["'[+1,']-1normal! >>"],
-      \   },
-      \   {
-      \     'buns'        : ['{', '}'],
-      \     'motionwise'  : ['line'],
-      \     'kind'        : ['delete'],
-      \     'linewise'    : 1,
-      \     'command'     : ["'[,']normal! <<"],
-      \   }
-      \ ]
+nnoremap <CR> :noh<CR><CR>  " Disable highlight after search
+" noremap <C-V> <C-V>
+" let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Completion
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"let g:deoplete#enable_at_startup = 1
-
+let g:jedi#completions_enabled = 0
+"let g:jedi#show_call_signatures = "1"
+let g:ycm_autoclose_preview_window_after_insertion = 1
+let g:ycm_key_list_select_completion = ['<Down>']
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Snippets
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+let g:UltiSnipsEditSplit="vertical"
+let g:ultisnips_python_style="google"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Environment
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:poetv_auto_activate = 1
-"set omnifunc=jedi#completions
-"let g:jedi#force_py_version = '3'
-"let g:jedi#use_tabs_not_buffers = 1
-"let g:jedi#completions_enabled = 0
-"let g:deoplete#sources#jedi#enable_cache = 1
-"let g:jedi#show_call_signatures = "1"
-"call deoplete#custom#option({
-"\ 'auto_complete_delay': 0,
-"\ 'smart_case': v:true,
-"\ })
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Linting/Fixing
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:ale_fixers = {'python': ['black', 'isort', 'autopep8']}
 
 py3 << EOF
 import os
@@ -130,4 +130,3 @@ if 'VIRTUAL_ENV' in os.environ:
 			sys.path.remove(item)
 	sys.path[:0] = new_sys_path
 EOF
-

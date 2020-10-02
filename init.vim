@@ -8,6 +8,7 @@ set ts=4 sw=4 " tab to 4 spaces
 map <F12> :tabedit $MYVIMRC<CR>
 imap <F12> :tabedit $MYVIMRC<CR>
 let g:skip_loading_mswin = 1
+set autoread 
 " /usr/share/nvim/runtime/mswin.vim
 call vundle#begin()            " required
 Plugin 'VundleVim/Vundle.vim'  " required
@@ -73,16 +74,20 @@ noremap <silent> <C-h> :vertical resize +3<CR>
 noremap <silent> <C-l> :vertical resize -3<CR>
 noremap <silent> <C-j> :resize +3<CR>
 noremap <silent> <C-k> :resize -3<CR>
-:nnoremap <A-s-h> :topleft vsplit
-:nnoremap <A-s-j> :botright split
-:nnoremap <A-s-k> :topleft split
-:nnoremap <A-s-l> :botright vsplit
+:nnoremap <A-s-h> :topleft vsplit 
+:nnoremap <A-s-j> :botright split 
+:nnoremap <A-s-k> :topleft split 
+:nnoremap <A-s-l> :botright vsplit 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Other
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n> " Remap Esc from terminal
 nnoremap <CR> :noh<CR><CR>  " Disable highlight after search
+augroup TerminalStuff
+	" au! " Clear old autocommands
+	autocmd TermOpen * setlocal nonumber norelativenumber
+augroup END
 " noremap <C-V> <C-V>
 " let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

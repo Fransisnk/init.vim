@@ -6,10 +6,12 @@ set rtp+=~/.config/nvim/bundle/Vundle.vim
 let mapleader = ","
 set ts=4 sw=4 " tab to 4 spaces
 map <F12> :tabedit $MYVIMRC<CR>
-imap <F12> :tabedit $MYVIMRC<CR>
-let g:skip_loading_mswin = 1
+imap <F12> <C-c>:tabedit $MYVIMRC<CR>
+set updatetime=300
 set autoread 
-" /usr/share/nvim/runtime/mswin.vim
+set inccommand=nosplit " Live substitution highlight
+set mouse=a
+
 call vundle#begin()            " required
 Plugin 'VundleVim/Vundle.vim'  " required
 Plugin 'arcticicestudio/nord-vim'
@@ -20,14 +22,23 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'ekalinin/Dockerfile.vim'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
-"Plugin 'file:///~/.vim/bundle/sampleplugin'
-Plugin 'ycm-core/YouCompleteMe'
-Plugin 'davidhalter/jedi-vim'
 Plugin 'machakann/vim-sandwich'
 Plugin 'jiangmiao/auto-pairs'
 Plugin 'petobens/poet-v'
 Plugin 'vim-python/python-syntax'
+Plugin 'psliwka/vim-smoothie'
+Plugin 'ncm2/ncm2'
+Plugin 'roxma/nvim-yarp'
+autocmd BufEnter * call ncm2#enable_for_buffer()
+set completeopt=noinsert,menuone,noselect
+Plugin 'ncm2/ncm2-bufword'
+Plugin 'ncm2/ncm2-path'
+Plugin 'ncm2/ncm2-ultisnips'
 Plugin 'dense-analysis/ale'
+Plugin 'python-mode/python-mode'
+Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plugin 'junegunn/fzf.vim'
+Plugin 'unblevable/quick-scope'
 call vundle#end()               " required
 filetype plugin indent on       " required
 
@@ -47,6 +58,11 @@ let g:python_highlight_all = 1
 map <F2> :NERDTreeToggle<CR>
 let g:NERDTreeMapOpenSplit = 's'
 let g:NERDTreeMapOpenVSplit = 'v'
+map <A-f> :Files<CR>
+nnoremap <leader>ff :Files<CR>
+nnoremap <leader>fl :Lines<CR>
+nnoremap <leader>fc :Commits<CR>
+nnoremap <leader>fg :GFiles<CR>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Movements
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -88,16 +104,22 @@ augroup TerminalStuff
 	" au! " Clear old autocommands
 	autocmd TermOpen * setlocal nonumber norelativenumber
 augroup END
+let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 " noremap <C-V> <C-V>
 " let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Completion
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:jedi#completions_enabled = 0
+"let g:jedi#completions_enabled = 0
 "let g:jedi#show_call_signatures = "1"
-let g:ycm_autoclose_preview_window_after_insertion = 1
-let g:ycm_key_list_select_completion = ['<Down>']
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"let g:poetv_set_environment = 1
+"let g:ycm_autoclose_preview_window_after_insertion = 1
+"let g:ycm_key_list_select_completion = ['<Down>']
+let g:pymode_virtualenv = 1
+let g:pymode_rope = 1
+let g:pymode_rope_completion = 1
+let g:pymode_folding = 1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Snippets
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:UltiSnipsExpandTrigger="<tab>"
@@ -113,6 +135,8 @@ let g:poetv_auto_activate = 1
 " Linting/Fixing
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:ale_fixers = {'python': ['black', 'isort', 'autopep8']}
+let g:pymode_lint_cwindow = 0
+let g:pymode_options_max_line_length = 100
 
 py3 << EOF
 import os

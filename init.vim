@@ -27,21 +27,14 @@ Plugin 'jiangmiao/auto-pairs'
 Plugin 'petobens/poet-v'
 Plugin 'vim-python/python-syntax'
 Plugin 'psliwka/vim-smoothie'
-Plugin 'ncm2/ncm2'
-Plugin 'roxma/nvim-yarp'
-autocmd BufEnter * call ncm2#enable_for_buffer()
-set completeopt=noinsert,menuone,noselect
-Plugin 'ncm2/ncm2-bufword'
-Plugin 'ncm2/ncm2-path'
-Plugin 'ncm2/ncm2-ultisnips'
 Plugin 'dense-analysis/ale'
-Plugin 'python-mode/python-mode'
 Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plugin 'junegunn/fzf.vim'
 Plugin 'unblevable/quick-scope'
+Plugin 'neovim/nvim-lspconfig'
+Plugin 'nvim-lua/completion-nvim'
 call vundle#end()               " required
 filetype plugin indent on       " required
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Colors/Themes
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -105,21 +98,20 @@ augroup TerminalStuff
 	autocmd TermOpen * setlocal nonumber norelativenumber
 augroup END
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
-" noremap <C-V> <C-V>
-" let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Completion
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"let g:jedi#completions_enabled = 0
-"let g:jedi#show_call_signatures = "1"
-"let g:poetv_set_environment = 1
-"let g:ycm_autoclose_preview_window_after_insertion = 1
-"let g:ycm_key_list_select_completion = ['<Down>']
-let g:pymode_virtualenv = 1
-let g:pymode_rope = 1
-let g:pymode_rope_completion = 1
-let g:pymode_folding = 1
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+lua <<EOF
+require'nvim_lsp'.pyls_ms.setup{on_attach=require'completion'.on_attach, 
+								cmd = { "dotnet", "exec", "/home/fransik/python-language-server/output/bin/Debug/Microsoft.Python.LanguageServer.dll"}
+    }
+require'nvim_lsp'.dockerls.setup{}
+require'nvim_lsp'.yamlls.setup{}
+EOF
+set completeopt=menuone,noinsert,noselect
+let g:completion_enable_snippet = 'UltiSnips'
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Snippets
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:UltiSnipsExpandTrigger="<tab>"
@@ -135,8 +127,6 @@ let g:poetv_auto_activate = 1
 " Linting/Fixing
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:ale_fixers = {'python': ['black', 'isort', 'autopep8']}
-let g:pymode_lint_cwindow = 0
-let g:pymode_options_max_line_length = 100
 
 py3 << EOF
 import os

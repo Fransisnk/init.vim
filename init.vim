@@ -1,7 +1,6 @@
 set nocompatible               " be improved, required
 filetype off                   " required
 set relativenumber
-set rtp+=~/.config/nvim/bundle/Vundle.vim
 
 let mapleader = ","
 set ts=4 sw=4 " tab to 4 spaces
@@ -12,28 +11,32 @@ set autoread
 set inccommand=nosplit " Live substitution highlight
 set mouse=a
 
-call vundle#begin()            " required
-Plugin 'VundleVim/Vundle.vim'  " required
-Plugin 'arcticicestudio/nord-vim'
-Plugin 'preservim/nerdtree'
-Plugin 'vim-airline/vim-airline'
-Plugin 'tpope/vim-fugitive'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'ekalinin/Dockerfile.vim'
-Plugin 'SirVer/ultisnips'
-Plugin 'honza/vim-snippets'
-Plugin 'machakann/vim-sandwich'
-Plugin 'jiangmiao/auto-pairs'
-Plugin 'petobens/poet-v'
-Plugin 'vim-python/python-syntax'
-Plugin 'psliwka/vim-smoothie'
-Plugin 'dense-analysis/ale'
-Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plugin 'junegunn/fzf.vim'
-Plugin 'unblevable/quick-scope'
-Plugin 'neovim/nvim-lspconfig'
-Plugin 'nvim-lua/completion-nvim'
-call vundle#end()               " required
+call plug#begin(stdpath('data') . '/plugged')            " required
+Plug 'VundleVim/Vundle.vim'  " required
+Plug 'arcticicestudio/nord-vim'
+Plug 'preservim/nerdtree'
+Plug 'vim-airline/vim-airline'
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+Plug 'ekalinin/Dockerfile.vim'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+Plug 'machakann/vim-sandwich'
+Plug 'jiangmiao/auto-pairs'
+Plug 'vim-python/python-syntax'
+Plug 'psliwka/vim-smoothie'
+Plug 'dense-analysis/ale'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'unblevable/quick-scope'
+Plug 'neovim/nvim-lspconfig'
+Plug 'nvim-lua/completion-nvim'
+Plug 'steelsojka/completion-buffers'
+Plug 'jmcantrell/vim-virtualenv'
+Plug 'google/vim-maktaba'
+Plug 'google/vim-coverage'
+Plug 'google/vim-glaive'
+call plug#end()               " required
 filetype plugin indent on       " required
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Colors/Themes
@@ -98,17 +101,53 @@ augroup TerminalStuff
 	autocmd TermOpen * setlocal nonumber norelativenumber
 augroup END
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
+call glaive#Install()
+
+xnoremap <leader>c :w !clip.exe<cr><cr>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Completion
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+set shell=/usr/bin/zsh
+let g:completion_chain_complete_list = [
+    \{'complete_items': ['lsp', 'snippet', 'buffers']},
+    \{'mode': '<c-p>'},
+    \{'mode': '<c-n>'}
+	\]
 lua <<EOF
-require'nvim_lsp'.pyls_ms.setup{on_attach=require'completion'.on_attach, 
+local map = function(type, key, value)
+	vim.fn.nvim_buf_set_keymap(0,type,key,value,{noremap = true, silent = true});
+end
+
+local custom_attach = function(client)
+	print("LSP started.");
+	require'completion'.on_attach(client)
+
+	map('n','gD','<cmd>lua vim.lsp.buf.declaration()<CR>')
+	map('n','gd','<cmd>lua vim.lsp.buf.definition()<CR>')
+	map('n','K','<cmd>lua vim.lsp.buf.hover()<CR>')
+	map('n','gr','<cmd>lua vim.lsp.buf.references()<CR>')
+	map('n','gs','<cmd>lua vim.lsp.buf.signature_help()<CR>')
+	map('n','gi','<cmd>lua vim.lsp.buf.implementation()<CR>')
+	map('n','gt','<cmd>lua vim.lsp.buf.type_definition()<CR>')
+	map('n','<leader>gw','<cmd>lua vim.lsp.buf.document_symbol()<CR>')
+	map('n','<leader>gW','<cmd>lua vim.lsp.buf.workspace_symbol()<CR>')
+	map('n','<leader>ah','<cmd>lua vim.lsp.buf.hover()<CR>')
+	map('n','<leader>af','<cmd>lua vim.lsp.buf.code_action()<CR>')
+	map('n','<leader>ee','<cmd>lua vim.lsp.util.show_line_diagnostics()<CR>')
+	map('n','<leader>ar','<cmd>lua vim.lsp.buf.rename()<CR>')
+	map('n','<leader>=', '<cmd>lua vim.lsp.buf.formatting()<CR>')
+	map('n','<leader>ai','<cmd>lua vim.lsp.buf.incoming_calls()<CR>')
+	map('n','<leader>ao','<cmd>lua vim.lsp.buf.outgoing_calls()<CR>')
+end
+
+require'lspconfig'.pyls_ms.setup{on_attach=custom_attach, 
 								cmd = { "dotnet", "exec", "/home/fransik/python-language-server/output/bin/Debug/Microsoft.Python.LanguageServer.dll"}
     }
-require'nvim_lsp'.dockerls.setup{}
-require'nvim_lsp'.yamlls.setup{}
+require'lspconfig'.dockerls.setup{}
+require'lspconfig'.yamlls.setup{}
 EOF
-set completeopt=menuone,noinsert,noselect
+let g:completion_trigger_keyword_length = 2 
+set completeopt=menuone,noinsert
 let g:completion_enable_snippet = 'UltiSnips'
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -122,30 +161,13 @@ let g:ultisnips_python_style="google"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Environment
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:poetv_auto_activate = 1
+let g:virtualenv_directory = '~/.cache/pypoetry/virtualenvs'
+"let g:poetv_auto_activate = 1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Linting/Fixing
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:ale_fixers = {'python': ['black', 'isort', 'autopep8']}
-
-py3 << EOF
-import os
-import sys
-import vim
-import jedi
-if 'VIRTUAL_ENV' in os.environ:
-	base = os.environ['VIRTUAL_ENV']
-	site_packages = os.path.join(base, 'lib', 'python%s' %  sys.version[:3], 'site-packages')
-	prev_sys_path = list(sys.path)
-	import site
-	site.addsitedir(site_packages)
-	sys.real_prefix = sys.prefix
-	sys.prefix = base
-	# Move the added items to the front of the path:
-	new_sys_path = []
-	for item in list(sys.path):
-		if item not in prev_sys_path:
-			new_sys_path.append(item)
-			sys.path.remove(item)
-	sys.path[:0] = new_sys_path
-EOF
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Testing
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+nnoremap <leader>ct :CoverageToggle<CR>

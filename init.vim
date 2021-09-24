@@ -18,24 +18,20 @@ Plug 'preservim/nerdtree'
 Plug 'vim-airline/vim-airline'
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
-Plug 'ekalinin/Dockerfile.vim'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 Plug 'machakann/vim-sandwich'
-Plug 'jiangmiao/auto-pairs'
-Plug 'vim-python/python-syntax'
+" Plug 'vim-python/python-syntax'
 Plug 'psliwka/vim-smoothie'
-Plug 'dense-analysis/ale'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'unblevable/quick-scope'
 Plug 'neovim/nvim-lspconfig'
+Plug 'ray-x/lsp_signature.nvim'
 Plug 'nvim-lua/completion-nvim'
-Plug 'steelsojka/completion-buffers'
-Plug 'jmcantrell/vim-virtualenv'
 Plug 'google/vim-maktaba'
-Plug 'google/vim-coverage'
 Plug 'google/vim-glaive'
+"Plug 'HallerPatrick/py_lsp.nvim'
 call plug#end()               " required
 filetype plugin indent on       " required
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -108,46 +104,71 @@ xnoremap <leader>c :w !clip.exe<cr><cr>
 " Completion
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set shell=/usr/bin/zsh
-let g:completion_chain_complete_list = [
-    \{'complete_items': ['lsp', 'snippet', 'buffers']},
-    \{'mode': '<c-p>'},
-    \{'mode': '<c-n>'}
-	\]
 lua <<EOF
-local map = function(type, key, value)
-	vim.fn.nvim_buf_set_keymap(0,type,key,value,{noremap = true, silent = true});
+-- require'py_lsp'.setup {}
+vim.lsp.set_log_level("debug")
+
+local custom_attach = function(client, bufnr)
+  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+  require'completion'.on_attach(client)
+
+  -- Enable completion triggered by <c-x><c-o>
+  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+  -- Mappings.
+  local opts = { noremap=true, silent=true }
+
+  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+  buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+  buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+  buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+  buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+  buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
 end
 
-local custom_attach = function(client)
-	print("LSP started.");
-	require'completion'.on_attach(client)
-
-	map('n','gD','<cmd>lua vim.lsp.buf.declaration()<CR>')
-	map('n','gd','<cmd>lua vim.lsp.buf.definition()<CR>')
-	map('n','K','<cmd>lua vim.lsp.buf.hover()<CR>')
-	map('n','gr','<cmd>lua vim.lsp.buf.references()<CR>')
-	map('n','gs','<cmd>lua vim.lsp.buf.signature_help()<CR>')
-	map('n','gi','<cmd>lua vim.lsp.buf.implementation()<CR>')
-	map('n','gt','<cmd>lua vim.lsp.buf.type_definition()<CR>')
-	map('n','<leader>gw','<cmd>lua vim.lsp.buf.document_symbol()<CR>')
-	map('n','<leader>gW','<cmd>lua vim.lsp.buf.workspace_symbol()<CR>')
-	map('n','<leader>ah','<cmd>lua vim.lsp.buf.hover()<CR>')
-	map('n','<leader>af','<cmd>lua vim.lsp.buf.code_action()<CR>')
-	map('n','<leader>ee','<cmd>lua vim.lsp.util.show_line_diagnostics()<CR>')
-	map('n','<leader>ar','<cmd>lua vim.lsp.buf.rename()<CR>')
-	map('n','<leader>=', '<cmd>lua vim.lsp.buf.formatting()<CR>')
-	map('n','<leader>ai','<cmd>lua vim.lsp.buf.incoming_calls()<CR>')
-	map('n','<leader>ao','<cmd>lua vim.lsp.buf.outgoing_calls()<CR>')
-end
-
-require'lspconfig'.pyls_ms.setup{on_attach=custom_attach, 
-								cmd = { "dotnet", "exec", "/home/fransik/python-language-server/output/bin/Debug/Microsoft.Python.LanguageServer.dll"}
-    }
+require'lspconfig'.pyright.setup{
+	on_attach=custom_attach,
+	settings = {
+		  python = {
+			analysis = {
+			  typeCheckingMode = "off",
+			  autoSearchPaths = true,
+			  reportOptionalMemberAccess = false,
+			  extraPaths = {"/mnt/c/projects/ais_tools"}
+			  -- executionEnvironments = {{ root = "availability_predictor", extraPaths = {"/mnt/c/projects/ais_tools" }}}
+			  }
+		}
+	}
+}
 require'lspconfig'.dockerls.setup{}
-require'lspconfig'.yamlls.setup{}
+require"lsp_signature".setup{}
 EOF
 let g:completion_trigger_keyword_length = 2 
-set completeopt=menuone,noinsert
+" Use <Tab> and <S-Tab> to navigate through popup menu
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+" Set completeopt to have a better completion experience
+" set completeopt=menuone,noinsert,noselect
+set completeopt=menu,menuone,noselect
+
+" 
+" Avoid showing message extra message when using completion
+set shortmess+=c
+
 let g:completion_enable_snippet = 'UltiSnips'
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -161,13 +182,44 @@ let g:ultisnips_python_style="google"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Environment
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:virtualenv_directory = '~/.cache/pypoetry/virtualenvs'
+" let g:virtualenv_directory = '~/.cache/pypoetry/virtualenvs'
 "let g:poetv_auto_activate = 1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Linting/Fixing
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:ale_fixers = {'python': ['black', 'isort', 'autopep8']}
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Testing
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 nnoremap <leader>ct :CoverageToggle<CR>
+
+
+
+function! DoPrettyXML()
+  " save the filetype so we can restore it later
+  let l:origft = &ft
+  set ft=
+  " delete the xml header if it exists. This will
+  " permit us to surround the document with fake tags
+  " without creating invalid xml.
+  1s/<?xml .*?>//e
+  " insert fake tags around the entire document.
+  " This will permit us to pretty-format excerpts of
+  " XML that may contain multiple top-level elements.
+  0put ='<PrettyXML>'
+  $put ='</PrettyXML>'
+  silent %!xmllint --format -
+  " xmllint will insert an <?xml?> header. it's easy enough to delete
+  " if you don't want it.
+  " delete the fake tags
+  2d
+  $d
+  " restore the 'normal' indentation, which is one extra level
+  " too deep due to the extra tags we wrapped around the document.
+  silent %<
+  " back to home
+  1
+  " restore the filetype
+  exe "set ft=" . l:origft
+endfunction
+command! PrettyXML call DoPrettyXML()
+nnoremap <leader>fx :PrettyXML<CR>

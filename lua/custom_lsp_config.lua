@@ -4,10 +4,10 @@ vim.lsp.set_log_level("debug")
 local custom_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-  require'completion'.on_attach(client)
 
+  -- require'completion'.on_attach()
   -- Enable completion triggered by <c-x><c-o>
-  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+  -- buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   -- Mappings.
   local opts = { noremap=true, silent=true }
@@ -35,6 +35,7 @@ end
 require"lsp_signature".setup{}
 -- https://github.com/microsoft/pyright/blob/main/docs/settings.md
 require'lspconfig'.pyright.setup{
+    capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities()),
 	on_attach=custom_attach,
 	settings = {
 		  python = {
@@ -47,4 +48,4 @@ require'lspconfig'.pyright.setup{
 		}
 	}
 }
-require'lspconfig'.dockerls.setup{}
+--require'lspconfig'.dockerls.setup{capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())}

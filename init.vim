@@ -2,7 +2,7 @@ set nocompatible               " be improved, required
 filetype off                   " required
 set relativenumber
 
-let mapleader = ","
+let mapleader = " "
 set ts=4 sw=4 " tab to 4 spaces
 map <F12> :tabedit $MYVIMRC<CR>
 imap <F12> <C-c>:tabedit $MYVIMRC<CR>
@@ -40,9 +40,7 @@ Plug 'unblevable/quick-scope'
 " lsp
 Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/lsp_signature.nvim'
-Plug 'nvim-lua/completion-nvim'
- "Plug 'google/vim-maktaba'
-"Plug 'google/vim-glaive'
+" Plug 'nvim-lua/completion-nvim'
 
 " File finder
 Plug 'nvim-lua/plenary.nvim'
@@ -53,6 +51,13 @@ Plug 'kyazdani42/nvim-web-devicons'
 
 " tresitter
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+ " completion
+" Plug 'nvim-lua/completion-nvim'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/nvim-cmp'
+Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 call plug#end()               " required
 filetype plugin indent on       " required
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -105,6 +110,27 @@ noremap <silent> <C-k> :resize -3<CR>
 :nnoremap <A-s-l> :botright vsplit 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Completion
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+lua require('custom_completion_config')
+" autocmd BufEnter * lua require'completion'.on_attach()
+
+
+" Use <Tab> and <S-Tab> to navigate through popup menu
+" inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+" inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+" Set completeopt to have a better completion experience
+" set completeopt=menuone,noinsert,noselect
+
+" Avoid showing message extra message when using completion
+" set shortmess+=c
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lsp
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+lua require('custom_lsp_config')
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Other
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n> " Remap Esc from terminal
@@ -119,35 +145,47 @@ let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 xnoremap <leader>c :w !clip.exe<cr><cr>
 
 lua require('custom_treesitter_config')
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Completion
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set shell=/usr/bin/zsh
-lua require('custom_lsp_config')
-let g:completion_trigger_keyword_length = 2 
-" Use <Tab> and <S-Tab> to navigate through popup menu
-inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
-" Set completeopt to have a better completion experience
-" set completeopt=menuone,noinsert,noselect
-set completeopt=menu,menuone,noselect
-
-" 
-" Avoid showing message extra message when using completion
-set shortmess+=c
-
-let g:completion_enable_snippet = 'UltiSnips'
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Snippets
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-let g:UltiSnipsEditSplit="vertical"
-let g:ultisnips_python_style="google"
+" let g:UltiSnipsExpandTrigger="<tab>"
+" let g:UltiSnipsJumpForwardTrigger="<tab>"
+" let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+" let g:UltiSnipsEditSplit="vertical"
+" let g:ultisnips_python_style="google"
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Folds
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set foldmethod=expr
 set foldexpr=nvim_treesitter#foldexpr()
 set foldlevel=99
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Remaps
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" yank to end
+nnoremap Y y$
+
+" Centered movement
+nnoremap n nzzzv
+nnoremap N Nzzzv
+nnoremap J mzJ`z
+
+" Chunkwise undo
+inoremap , ,<c-g>u
+inoremap . .<c-g>u
+inoremap ! !<c-g>u
+inoremap ? ?<c-g>u
+" 
+" Text moving
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
+inoremap <C-j> <esc>:m .+1<CR>==:star<CR>
+inoremap <C-k> <esc>:m .-2<CR>==:star<CR>
+nnoremap <leader>k :m .-2<CR>==
+nnoremap <leader>j :m .+1<CR>==
+
+let g:python3_host_prog = '/usr/bin/python3'

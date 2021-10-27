@@ -16,9 +16,10 @@ Plug 'VundleVim/Vundle.vim'  " required
 
 " Theme
 Plug 'arcticicestudio/nord-vim'
+Plug 'whatyouhide/vim-gotham'
 
 " Statusline
-Plug 'vim-airline/vim-airline'
+Plug 'nvim-lualine/lualine.nvim'
 
 " Git tolls
 Plug 'tpope/vim-fugitive'
@@ -46,6 +47,12 @@ Plug 'ray-x/lsp_signature.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
+Plug 'norcalli/nvim-terminal.lua'
+Plug 'camgraff/telescope-tmux.nvim'
+
+" Terminal
+Plug 'voldikss/vim-floaterm'
+
 " file icons
 Plug 'kyazdani42/nvim-web-devicons'
 
@@ -58,6 +65,10 @@ Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+
+Plug 'RishabhRD/popfix'
+Plug 'RishabhRD/nvim-lsputils'
+
 call plug#end()               " required
 filetype plugin indent on       " required
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -68,7 +79,10 @@ set cursorline
 let g:nord_cursor_line_number_background = 1
 let g:nord_uniform_diff_background = 1
 let g:python_highlight_all = 1
-:colorscheme nord
+" colorscheme nord
+colorscheme gotham
+
+lua require('lualine').setup()
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Filesystem
@@ -77,6 +91,8 @@ nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fb <cmd>Telescope file_browser<cr>
 nnoremap <leader>fl <cmd>Telescope live_grep<cr>
 nnoremap <leader>fc <cmd>Telescope git_commits<cr>
+nnoremap <leader>fg <cmd>Telescope git_branches<cr>
+nnoremap <leader>fs <cmd>Telescope tmux sessions<cr>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Movements
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -99,29 +115,16 @@ nnoremap <leader>fc <cmd>Telescope git_commits<cr>
 set splitright
 set splitbelow
 
-map <F10> :split term://bash<CR>i
-noremap <silent> <C-h> :vertical resize +3<CR>
-noremap <silent> <C-l> :vertical resize -3<CR>
-noremap <silent> <C-j> :resize +3<CR>
-noremap <silent> <C-k> :resize -3<CR>
-:nnoremap <A-s-h> :topleft vsplit 
-:nnoremap <A-s-j> :botright split 
-:nnoremap <A-s-k> :topleft split 
-:nnoremap <A-s-l> :botright vsplit 
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Completion
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 lua require('custom_completion_config')
+nnoremap <silent> <leader>ca <cmd>lua vim.lsp.buf.code_action()<CR>
+vnoremap <silent> <leader>ca <cmd>lua vim.lsp.buf.range_code_action()<CR>
 " autocmd BufEnter * lua require'completion'.on_attach()
 
-
-" Use <Tab> and <S-Tab> to navigate through popup menu
-" inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-" inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-
 " Set completeopt to have a better completion experience
-" set completeopt=menuone,noinsert,noselect
+set completeopt=menuone,noinsert,noselect
 
 " Avoid showing message extra message when using completion
 " set shortmess+=c
@@ -130,6 +133,7 @@ lua require('custom_completion_config')
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 lua require('custom_lsp_config')
+lua vim.lsp.set_log_level('WARN')
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Other
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -150,11 +154,24 @@ set shell=/usr/bin/zsh
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Snippets
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" let g:UltiSnipsExpandTrigger="<tab>"
-" let g:UltiSnipsJumpForwardTrigger="<tab>"
-" let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-" let g:UltiSnipsEditSplit="vertical"
-" let g:ultisnips_python_style="google"
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+let g:UltiSnipsEditSplit="vertical"
+let g:ultisnips_python_style="google"
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Terminal
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+lua require('custom_terminal_config')
+let g:floaterm_keymap_new    = '<F7>'
+let g:floaterm_keymap_prev   = '<F8>'
+let g:floaterm_keymap_next   = '<F9>'
+let g:floaterm_keymap_toggle = '<F10>'
+
+nnoremap <leader>tp :FloatermNew --width=0.5 --wintype=normal --position=right ipython<cr>
+
+nnoremap <leader>tt <cmd>lua make_ipynb()<cr>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folds

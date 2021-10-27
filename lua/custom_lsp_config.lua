@@ -1,6 +1,18 @@
 -- require'py_lsp'.setup {}
 vim.lsp.set_log_level("debug")
 
+vim.lsp.handlers['textDocument/codeAction'] = require'lsputil.codeAction'.code_action_handler
+vim.lsp.handlers['textDocument/references'] = require'lsputil.locations'.references_handler
+vim.lsp.handlers['textDocument/definition'] = require'lsputil.locations'.definition_handler
+vim.lsp.handlers['textDocument/declaration'] = require'lsputil.locations'.declaration_handler
+vim.lsp.handlers['textDocument/typeDefinition'] = require'lsputil.locations'.typeDefinition_handler
+vim.lsp.handlers['textDocument/implementation'] = require'lsputil.locations'.implementation_handler
+vim.lsp.handlers['textDocument/documentSymbol'] = require'lsputil.symbols'.document_handler
+vim.lsp.handlers['workspace/symbol'] = require'lsputil.symbols'.workspace_handler
+
+local util = require('lspconfig').util 
+local path = util.path
+
 local custom_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
@@ -31,21 +43,8 @@ local custom_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
   buf_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
 end
-
 require"lsp_signature".setup{}
--- https://github.com/microsoft/pyright/blob/main/docs/settings.md
-require'lspconfig'.pyright.setup{
-    capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities()),
+require'lspconfig'.jedi_language_server.setup{
+	cmd = { "jedi-language-server" }, 
 	on_attach=custom_attach,
-	settings = {
-		  python = {
-			analysis = {
-			  typeCheckingMode = "off",
-			  autoSearchPaths = true,
-			  reportOptionalMemberAccess = false,
-			  extraPaths = {"/mnt/c/projects/ais_tools"}
-			  }
-		}
-	}
 }
---require'lspconfig'.dockerls.setup{capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())}

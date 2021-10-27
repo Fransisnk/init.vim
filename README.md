@@ -28,3 +28,8 @@ Sauce code
 `sudo apt install npm`
 
 `npm i -g pyright`
+
+
+## Themes
+
+https://github.com/rafi/awesome-vim-colorschemes

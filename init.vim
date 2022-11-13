@@ -10,6 +10,7 @@ set updatetime=300
 set autoread 
 set inccommand=nosplit " Live substitution highlight
 set mouse=a
+set shell=/bin/zsh
 
 call plug#begin(stdpath('data') . '/plugged')            " required
 Plug 'VundleVim/Vundle.vim'  " required
@@ -21,16 +22,15 @@ Plug 'whatyouhide/vim-gotham'
 " Statusline
 Plug 'nvim-lualine/lualine.nvim'
 
-" Git tolls
+Plug 'folke/noice.nvim'
+Plug 'MunifTanjim/nui.nvim'
+
+" Git tols
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 
-" Snippets
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
-
 " () '' tools
-Plug 'machakann/vim-sandwich'
+Plug 'kylechui/nvim-surround'
 
 " smooth scrolling
 Plug 'psliwka/vim-smoothie'
@@ -41,10 +41,15 @@ Plug 'unblevable/quick-scope'
 " lsp
 Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/lsp_signature.nvim'
-" Plug 'nvim-lua/completion-nvim'
+"
+Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
+" 9000+ Snippets
+" Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
+
+Plug 'https://git.sr.ht/~whynothugo/lsp_lines.nvim'
 
 " File finder
-Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-lua/plenary.nvim' " Used by telescope
 Plug 'nvim-telescope/telescope.nvim'
 
 Plug 'norcalli/nvim-terminal.lua'
@@ -59,15 +64,8 @@ Plug 'kyazdani42/nvim-web-devicons'
 " tresitter
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
- " completion
-" Plug 'nvim-lua/completion-nvim'
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'hrsh7th/cmp-buffer'
-Plug 'hrsh7th/nvim-cmp'
-Plug 'quangnguyen30192/cmp-nvim-ultisnips'
-
-Plug 'RishabhRD/popfix'
-Plug 'RishabhRD/nvim-lsputils'
+" Hover
+Plug 'lewis6991/hover.nvim'
 
 call plug#end()               " required
 filetype plugin indent on       " required
@@ -83,6 +81,10 @@ let g:python_highlight_all = 1
 colorscheme gotham
 
 lua require('lualine').setup()
+lua require("nvim-surround").setup()
+lua require("noice").setup()
+lua require("lsp_lines").setup()
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Filesystem
@@ -118,9 +120,9 @@ set splitbelow
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Completion
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-lua require('custom_completion_config')
 nnoremap <silent> <leader>ca <cmd>lua vim.lsp.buf.code_action()<CR>
-vnoremap <silent> <leader>ca <cmd>lua vim.lsp.buf.range_code_action()<CR>
+vnoremap <silent> <leader>ca <cmd>lua vim.lsp.buf.code_action()<CR>
+" vnoremap <silent> <leader>ca <cmd>lua vim.lsp.buf.range_code_action()<CR>
 " autocmd BufEnter * lua require'completion'.on_attach()
 
 " Set completeopt to have a better completion experience
@@ -131,9 +133,12 @@ set completeopt=menuone,noinsert,noselect
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Lsp
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
+let g:coq_settings = { 'auto_start': v:true }
 lua require('custom_lsp_config')
-lua vim.lsp.set_log_level('WARN')
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Hover
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+lua require('custom_hover_config')
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Other
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -144,21 +149,8 @@ augroup TerminalStuff
 	autocmd TermOpen * setlocal nonumber norelativenumber
 augroup END
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
-"call glaive#Install()
-
-xnoremap <leader>c :w !clip.exe<cr><cr>
 
 lua require('custom_treesitter_config')
-set shell=/usr/bin/zsh
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Snippets
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-let g:UltiSnipsEditSplit="vertical"
-let g:ultisnips_python_style="google"
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Terminal
@@ -205,4 +197,18 @@ inoremap <C-k> <esc>:m .-2<CR>==:star<CR>
 nnoremap <leader>k :m .-2<CR>==
 nnoremap <leader>j :m .+1<CR>==
 
+
+nnoremap <leader>cj <cmd>cn<cr> " Next quick fix error
+nnoremap <leader>ck <cmd>cp<cr>
+nnoremap <leader>cn <cmd>cnf<cr> " First error next file
+nnoremap <leader>co <cmd>copen<cr> " Open quickfix
+nnoremap <leader>cc <cmd>ccl<cr> " Open quickfix
+
+
 let g:python3_host_prog = '/usr/bin/python3'
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Biscuit Remaps
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+nnoremap <leader>ac <cmd>vsplit  ~/.config/nvim/lua/biscuit_acronyms.lua<cr>

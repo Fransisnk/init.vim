@@ -6,6 +6,8 @@ function make_ipynb(...)
 	vim.api.nvim_exec('FloatermSend --name=ipynbterm \\%autoindent', false)
 end
 
+g.floaterm_width = .9
+g.floaterm_height = .9
 g.floaterm_keymap_new    = '<F7>'
 g.floaterm_keymap_prev   = '<F8>'
 g.floaterm_keymap_next   = '<F9>'

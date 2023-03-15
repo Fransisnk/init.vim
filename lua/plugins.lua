@@ -11,20 +11,26 @@ end
 
 local packer_bootstrap = ensure_packer()
 
-
---[[
 vim.g.coq_settings = {
-	auto_start = true,
-	['display.pum.y_max_len'] = 3,
-	['display.pum.y_ratio'] = .1,
+	['display.pum.y_max_len'] = 6,
+	['display.pum.y_ratio'] = .2,
+	['display.pum.fast_close'] = false,
 	["keymap.pre_select"] = true,
+	-- ['keymap.jump_to_mark'] = '<leader>n',
+	['weights.recency'] = 1.2,
+	['completion.skip_after'] = { "{", "}", "[", "]", '(', ')', ','},
+	auto_start = 'shut-up',
 	clients = {
 		lsp = {
 			enabled = true,
 			weight_adjust = 1.1
 		},
+		tmux = {
+			enabled = false,
+			weight_adjust = 1.0
+		},
 		tree_sitter = {
-			enabled = true,
+			enabled = false,
 			weight_adjust = 1.0
 		},
 		tabnine = {
@@ -32,38 +38,56 @@ vim.g.coq_settings = {
 		},
 	},
 }
---]]
+
+vim.cmd([[
+  augroup packer_user_config
+    autocmd!
+    autocmd BufWritePost plugins.lua source <afile> | PackerCompile
+  augroup end
+]])
 
 return require('packer').startup(function(use)
 	use 'wbthomason/packer.nvim'
 
-	use 'whatyouhide/vim-gotham'
+	-- use { '/Users/fransismnk/Projects/foundry-tools', requires = 'nvim-lua/plenary.nvim' }
+	--use { 'whatyouhide/vim-gotham', run = vim.cmd [[ colorscheme gotham ]] }
+	-- use { 'EdenEast/nightfox.nvim', config = require('custom_nightfox_config')}
+	use { 'EdenEast/nightfox.nvim', config = require('custom_nightfox_config')}
+	use { 'kyazdani42/nvim-web-devicons' }
 
 	-- Statusline
 	use {
 		'nvim-lualine/lualine.nvim',
-		config = require("lualine").setup(),
-		requires = { 'kyazdani42/nvim-web-devicons', opt = true }
+		requires = { 'kyazdani42/nvim-web-devicons', opt = true },
+		config = require('lualine').setup()
 	}
 
 	-- nicer command line and messages
-	use {
-		'folke/noice.nvim',
-		config = function()
-			require("noice").setup()
-		end,
-		requires = {
-			'MunifTanjim/nui.nvim',
-			'rcarriga/nvim-notify',
-		}
-	}
+	--[[
+	use({
+  "folke/noice.nvim",
+  config = function()
+    require("noice").setup({
+        -- add any options here
+    })
+  end,
+  requires = {
+    -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+    "MunifTanjim/nui.nvim",
+    -- OPTIONAL:
+    --   `nvim-notify` is only needed, if you want to use the notification view.
+    --   If not available, we use `mini` as the fallback
+    "rcarriga/nvim-notify",
+    }
+})
+	--]]
 
 	-- Git tols
 	-- use 'tpope/vim-fugitive'
 	-- use 'airblade/vim-gitgutter'
 	use {
 		'lewis6991/gitsigns.nvim',
-		config = require('custom_git_config')
+		config = function() require('custom_git_config') end
 	}
 
 	-- () '' tools
@@ -81,20 +105,14 @@ return require('packer').startup(function(use)
 	-- f F preview
 	use 'unblevable/quick-scope'
 
-	-- lsp
-	use {
-		'neovim/nvim-lspconfig',
-		config = require("custom_lsp_config"),
-	}
 
-	use 'ray-x/lsp_signature.nvim'
-	--
 	use { 'ms-jpq/coq_nvim',
 		branch = 'coq',
-		config = require('coq'),
+		--run = ':COQdeps',
 	}
+	--[[
 	-- 9000+ Snippets
-	-- use 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
+	-- use { 'ms-jpq/coq.artifacts', branch = 'artifacts' }
 
 	use {
 		'https://git.sr.ht/~whynothugo/lsp_lines.nvim',
@@ -102,14 +120,20 @@ return require('packer').startup(function(use)
 			require("lsp_lines").setup()
 		end,
 	}
+	use 'ray-x/lsp_signature.nvim'
+	--]]
+	use {
+		'neovim/nvim-lspconfig',
+		config = require("custom_lsp_config"),
+	}
 
 	-- File finder
 	use {
 		'nvim-telescope/telescope.nvim', tag = '0.1.0',
-		requires = { { 'nvim-lua/plenary.nvim' } },
+		config = require("custom_telescope_config"),
+		requires = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-file-browser.nvim' },
 	}
 	-- use 'camgraff/telescope-tmux.nvim'
-	-- use "nvim-telescope/telescope-file-browser.nvim"
 
 	use 'norcalli/nvim-terminal.lua'
 
@@ -121,7 +145,11 @@ return require('packer').startup(function(use)
 	}
 
 	-- tresitter
-	use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
+	use {
+		'nvim-treesitter/nvim-treesitter',
+		run = ':TSUpdate',
+		config = require('custom_treesitter_config')
+	}
 
 	-- Hover
 	use { 'lewis6991/hover.nvim',

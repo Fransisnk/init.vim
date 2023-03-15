@@ -1,4 +1,6 @@
 local coq = require "coq"
+local util = require 'lspconfig/util'
+
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 local opts = { noremap = true, silent = true }
@@ -38,17 +40,12 @@ local lsp_flags = {
 	-- This is the default in Nvim 0.7+
 	debounce_text_changes = 150,
 }
-local util = require 'lspconfig/util'
 
 require('lspconfig')['pyright'].setup {
 	coq.lsp_ensure_capabilities {
 		on_attach = on_attach,
-		flags = lsp_flags,
-		settings = {
-			python = {
-				pythonPath = '/usr/bin/Python3'
-			}
-		},
+		--flags = lsp_flags,
+		settings = { python = { pythonPath = '/usr/bin/python3' } },
 		root_dir = function(fname)
 			local root_files = {
 				'pyproject.toml',
@@ -62,12 +59,87 @@ require('lspconfig')['pyright'].setup {
 		end,
 	}
 }
-require('lspconfig')['tsserver'].setup {
-	-- cmd = { "typescript-language-server" },
-	on_attach = on_attach,
-	flags = lsp_flags,
+
+
+--[[
+require('lspconfig')['tsserver'].setup(coq.lsp_ensure_capabilities({
+    on_attach=on_attach,
+    filetypes = {
+        "javascript",
+        "javascriptreact",
+        "javascript.jsx",
+        "typescript",
+        "typescriptreact",
+        "typescript.tsx",
+        "json"
+    },
+    flags = {
+        allow_incremental_sync = true
+    },
+		root_dir = function(fname)
+			local root_files = {
+				'.git',
+				'package.json',
+			}
+			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
+		end,
+}))
+require('lspconfig')['denols'].setup {
+	coq.lsp_ensure_capabilities {
+		init_options = {
+		  enable = true,
+		  lint = false,
+		  unstable = true,
+		  importMap = 'import_map.json'
+		},
+		on_attach = on_attach,
+		flags = lsp_flags,
+		root_dir = function(fname)
+			local root_files = {
+				'.git',
+				'settings.gradle',
+				'ci.yml',
+				'package.json',
+			}
+			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
+		end,
+}}
+require('lspconfig')['tsserver'].setup{
+	coq.lsp_ensure_capabilities {
+		on_attach = on_attach,
+		flags = lsp_flags,
+		cmd = {'typescript-language-server', '--stdio'},
+		root_dir = function(fname)
+			local root_files = {
+				'.git',
+				'package.json',
+			}
+			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
+		end,
+	}
 }
+}
+
+require "lspconfig".eslint.setup{
+		root_dir = function(fname)
+			local root_files = {
+				'.git',
+				'settings.gradle',
+				'ci.yml',
+			}
+			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
+		end,
+  on_attach = function(client, bufnr)
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      command = "EslintFixAll",
+    })
+  end,
+}--]]
+
+
 -- local black = require "efm/black"
+-- npm install --save-dev --save-exact prettier
 require "lspconfig".efm.setup {
 	on_attach = on_attach,
 	flags = lsp_flags,
@@ -77,12 +149,16 @@ require "lspconfig".efm.setup {
 		languages = {
 			python = {
 				{ formatCommand = "black --line-length 120 --quiet -", formatStdin = true }
+			},
+			typescript = {
+				{formatCommand = "npx prettier --stdin-filepath ", formatStdin = true }
 			}
 		}
-	}
+	},
+    filetypes = { 'python','typescript','lua' }
 }
 
-require 'lspconfig'.sumneko_lua.setup {
+require 'lspconfig'.lua_ls.setup {
 	settings = {
 		Lua = {
 			runtime = {
@@ -98,6 +174,9 @@ require 'lspconfig'.sumneko_lua.setup {
 				library = vim.api.nvim_get_runtime_file("", true),
 				checkThirdParty = false,
 			},
+		  telemetry = {
+			enable = false,
+		  },
 		},
 	},
 }
@@ -106,9 +185,11 @@ require 'lspconfig'.sumneko_lua.setup {
 vim.diagnostic.config({
 	virtual_text = false,
 })
+--[[
 vim.keymap.set(
 	"",
 	"<Leader>l",
 	require("lsp_lines").toggle,
 	{ desc = "Toggle lsp_lines" }
 )
+--]]

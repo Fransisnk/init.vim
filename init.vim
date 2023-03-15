@@ -11,9 +11,11 @@ set autoread
 set inccommand=nosplit " Live substitution highlight
 set mouse=a
 set shell=/bin/zsh
+set clipboard=unnamed
 
 lua require('plugins')
-lua vim.notify = require("notify")
+" lua require('/Users/fransismnk/Projects/foundry-tools.nvim')
+" lua vim.notify = require("notify")
 
 filetype plugin indent on       " required
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -23,7 +25,6 @@ set termguicolors
 set cursorline
 let g:python_highlight_all = 1
 " colorscheme nord
-colorscheme gotham
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -49,17 +50,6 @@ set splitright
 set splitbelow
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Completion
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-nnoremap <silent> <leader>ca <cmd>lua vim.lsp.buf.code_action()<CR>
-vnoremap <silent> <leader>ca <cmd>lua vim.lsp.buf.code_action()<CR>
-
-" Set completeopt to have a better completion experience
-" set completeopt=menuone,noinsert,noselect
-
-" Avoid showing message extra message when using completion
-" set shortmess+=c
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Other
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 :tnoremap <Esc> <C-\><C-n> " Remap Esc from terminal
@@ -70,7 +60,6 @@ augroup TerminalStuff
 augroup END
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
 
-lua require('custom_treesitter_config')
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folds

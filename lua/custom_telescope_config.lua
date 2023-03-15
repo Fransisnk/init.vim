@@ -1,11 +1,11 @@
 require('telescope').setup{
   defaults = {
     layout_config = {
-      horizontal = { width = 0.8 }
+      horizontal = { width = 0.9 }
     },
   },
 }
--- require("telescope").load_extension "file_browser"
+require("telescope").load_extension "file_browser"
 
 
 local builtin = require('telescope.builtin')
@@ -16,7 +16,7 @@ vim.keymap.set('n', '<leader>fg', builtin.grep_string, {})
 vim.keymap.set('n', '<leader>fr', builtin.lsp_references, {})
 
 
--- vim.keymap.set("n", "<leader>fb", ":Telescope file_browser", { noremap = true })
+vim.keymap.set("n", "<leader>fb", ":Telescope file_browser", { noremap = true })
 -- git
 vim.keymap.set('n', '<leader>fgc', builtin.git_commits, {})
 vim.keymap.set('n', '<leader>fgb', builtin.git_branches, {})

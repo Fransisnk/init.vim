@@ -13,9 +13,10 @@ set mouse=a
 set shell=/bin/zsh
 set clipboard=unnamed
 
-lua require('plugins')
+" lua require('plugins')
 " lua require('/Users/fransismnk/Projects/foundry-tools.nvim')
 " lua vim.notify = require("notify")
+lua require('plugins')
 
 filetype plugin indent on       " required
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

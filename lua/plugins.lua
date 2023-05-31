@@ -1,164 +1,47 @@
-local ensure_packer = function()
-	local fn = vim.fn
-	local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
-	if fn.empty(fn.glob(install_path)) > 0 then
-		fn.system({ 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path })
-		vim.cmd [[packadd packer.nvim]]
-		return true
-	end
-	return false
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable", -- latest stable release
+		lazypath,
+	})
 end
+vim.opt.rtp:prepend(lazypath)
+print(lazypath)
+--{ 'nvim-lualine/lualine.nvim', dependencies= { 'kyazdani42/nvim-web-devicons', opt = true }require('lualine').setup() },
 
-local packer_bootstrap = ensure_packer()
-
-vim.g.coq_settings = {
-	['display.pum.y_max_len'] = 6,
-	['display.pum.y_ratio'] = .2,
-	['display.pum.fast_close'] = false,
-	["keymap.pre_select"] = true,
-	-- ['keymap.jump_to_mark'] = '<leader>n',
-	['weights.recency'] = 1.2,
-	['completion.skip_after'] = { "{", "}", "[", "]", '(', ')', ','},
-	auto_start = 'shut-up',
-	clients = {
-		lsp = {
-			enabled = true,
-			weight_adjust = 1.1
-		},
-		tmux = {
-			enabled = false,
-			weight_adjust = 1.0
-		},
-		tree_sitter = {
-			enabled = false,
-			weight_adjust = 1.0
-		},
-		tabnine = {
-			enabled = false,
-		},
-	},
-}
-
-vim.cmd([[
-  augroup packer_user_config
-    autocmd!
-    autocmd BufWritePost plugins.lua source <afile> | PackerCompile
-  augroup end
-]])
-
-return require('packer').startup(function(use)
-	use 'wbthomason/packer.nvim'
-
-	-- use { '/Users/fransismnk/Projects/foundry-tools', requires = 'nvim-lua/plenary.nvim' }
-	--use { 'whatyouhide/vim-gotham', run = vim.cmd [[ colorscheme gotham ]] }
-	-- use { 'EdenEast/nightfox.nvim', config = require('custom_nightfox_config')}
-	use { 'EdenEast/nightfox.nvim', config = require('custom_nightfox_config')}
-	use { 'kyazdani42/nvim-web-devicons' }
-
-	-- Statusline
-	use {
-		'nvim-lualine/lualine.nvim',
-		requires = { 'kyazdani42/nvim-web-devicons', opt = true },
-		config = require('lualine').setup()
-	}
-
-	-- nicer command line and messages
-	--[[
-	use({
-  "folke/noice.nvim",
-  config = function()
-    require("noice").setup({
-        -- add any options here
-    })
-  end,
-  requires = {
-    -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
-    "MunifTanjim/nui.nvim",
-    -- OPTIONAL:
-    --   `nvim-notify` is only needed, if you want to use the notification view.
-    --   If not available, we use `mini` as the fallback
-    "rcarriga/nvim-notify",
-    }
+require("lazy").setup({
+	'neovim/nvim-lspconfig', --require("custom_lsp_config"), },
+	{ 'EdenEast/nightfox.nvim' },
+	{ 'kyazdani42/nvim-web-devicons' },
+	--{ 'lewis6991/gitsigns.nvim'function() require('custom_git_config') end }
+	{ 'sindrets/diffview.nvim', dependencies = 'nvim-lua/plenary.nvim' },
+	'psliwka/vim-smoothie',
+	--'unblevable/quick-scope',
+	'hrsh7th/cmp-nvim-lsp',
+	'hrsh7th/cmp-buffer',
+	'hrsh7th/cmp-path',
+	'hrsh7th/cmp-cmdline',
+	'hrsh7th/nvim-cmp',
+	'hrsh7th/cmp-vsnip',
+	'hrsh7th/vim-vsnip',
+	{ 'https://git.sr.ht/~whynothugo/lsp_lines.nvim' },
+	'ray-x/lsp_signature.nvim',
+	{ 'nvim-telescope/telescope.nvim', tag = '0.1.0',
+		dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-file-browser.nvim' }, },
+	'norcalli/nvim-terminal.lua',
+	{ 'voldikss/vim-floaterm' },
+	{ 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' },
+	{ 'lewis6991/hover.nvim' },
 })
-	--]]
 
-	-- Git tols
-	-- use 'tpope/vim-fugitive'
-	-- use 'airblade/vim-gitgutter'
-	use {
-		'lewis6991/gitsigns.nvim',
-		config = function() require('custom_git_config') end
-	}
-
-	-- () '' tools
-	use { 'kylechui/nvim-surround',
-		config = function()
-			require("nvim-surround").setup()
-		end,
-	}
-
-	use { 'sindrets/diffview.nvim', requires = 'nvim-lua/plenary.nvim' }
-
-	-- smooth scrolling
-	use 'psliwka/vim-smoothie'
-
-	-- f F preview
-	use 'unblevable/quick-scope'
-
-
-	use { 'ms-jpq/coq_nvim',
-		branch = 'coq',
-		--run = ':COQdeps',
-	}
-	--[[
-	-- 9000+ Snippets
-	-- use { 'ms-jpq/coq.artifacts', branch = 'artifacts' }
-
-	use {
-		'https://git.sr.ht/~whynothugo/lsp_lines.nvim',
-		config = function()
-			require("lsp_lines").setup()
-		end,
-	}
-	use 'ray-x/lsp_signature.nvim'
-	--]]
-	use {
-		'neovim/nvim-lspconfig',
-		config = require("custom_lsp_config"),
-	}
-
-	-- File finder
-	use {
-		'nvim-telescope/telescope.nvim', tag = '0.1.0',
-		config = require("custom_telescope_config"),
-		requires = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-file-browser.nvim' },
-	}
-	-- use 'camgraff/telescope-tmux.nvim'
-
-	use 'norcalli/nvim-terminal.lua'
-
-
-	-- Terminal
-	use {
-		'voldikss/vim-floaterm',
-		config = require("custom_terminal_config")
-	}
-
-	-- tresitter
-	use {
-		'nvim-treesitter/nvim-treesitter',
-		run = ':TSUpdate',
-		config = require('custom_treesitter_config')
-	}
-
-	-- Hover
-	use { 'lewis6991/hover.nvim',
-		config = require("custom_hover_config")
-	}
-
-	-- Automatically set up your configuration after cloning packer.nvim
-	-- Put this at the end after all plugins
-	if packer_bootstrap then
-		require('packer').sync()
-	end
-end)
+require("custom_lsp_config")
+require("custom_telescope_config")
+require("custom_terminal_config")
+require("custom_hover_config")
+require('custom_treesitter_config')
+require('custom_nightfox_config')
+require("lsp_lines").setup()

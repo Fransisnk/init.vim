@@ -1,5 +1,37 @@
-local coq = require "coq"
 local util = require 'lspconfig/util'
+local cmp = require'cmp'
+
+cmp.setup({
+snippet = {
+  -- REQUIRED - you must specify a snippet engine
+  expand = function(args)
+	vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+	-- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+	-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+	-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+  end,
+},
+window = {
+  -- completion = cmp.config.window.bordered(),
+  -- documentation = cmp.config.window.bordered(),
+},
+mapping = cmp.mapping.preset.insert({
+  ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+  ['<C-f>'] = cmp.mapping.scroll_docs(4),
+  ['<C-Space>'] = cmp.mapping.complete(),
+  ['<C-e>'] = cmp.mapping.abort(),
+  ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+}),
+sources = cmp.config.sources({
+  { name = 'nvim_lsp' },
+  { name = 'vsnip' }, -- For vsnip users.
+  -- { name = 'luasnip' }, -- For luasnip users.
+  -- { name = 'ultisnips' }, -- For ultisnips users.
+  -- { name = 'snippy' }, -- For snippy users.
+}, {
+  { name = 'buffer' },
+})
+})
 
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
@@ -41,28 +73,16 @@ local lsp_flags = {
 	debounce_text_changes = 150,
 }
 
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
 require('lspconfig')['pyright'].setup {
-	coq.lsp_ensure_capabilities {
 		on_attach = on_attach,
+		capabilities = capabilities,
 		--flags = lsp_flags,
 		settings = { python = { pythonPath = '/usr/bin/python3' } },
-		root_dir = function(fname)
-			local root_files = {
-				'pyproject.toml',
-				'setup.py',
-				'setup.cfg',
-				'requirements.txt',
-				'Pipfile',
-				'pyrightconfig.json',
-			}
-			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
-		end,
-	}
 }
 
-
---[[
-require('lspconfig')['tsserver'].setup(coq.lsp_ensure_capabilities({
+require('lspconfig')['tsserver'].setup{
     on_attach=on_attach,
     filetypes = {
         "javascript",
@@ -83,7 +103,9 @@ require('lspconfig')['tsserver'].setup(coq.lsp_ensure_capabilities({
 			}
 			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
 		end,
-}))
+}
+
+--[[
 require('lspconfig')['denols'].setup {
 	coq.lsp_ensure_capabilities {
 		init_options = {

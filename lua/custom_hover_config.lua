@@ -2,7 +2,7 @@
 require("hover").setup {
 	init = function()
 		require("hover.providers.lsp")
-		require("acronym_map")
+		--require("acronym_map")
 		-- require('hover.providers.dictionary')
 	end,
 	preview_opts = {

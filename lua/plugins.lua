@@ -28,6 +28,7 @@ require("lazy").setup({
 	'hrsh7th/nvim-cmp',
 	'hrsh7th/cmp-vsnip',
 	'hrsh7th/vim-vsnip',
+	'jakewvincent/mkdnflow.nvim',
 	{ 'https://git.sr.ht/~whynothugo/lsp_lines.nvim' },
 	'ray-x/lsp_signature.nvim',
 	{ 'nvim-telescope/telescope.nvim', tag = '0.1.0',
@@ -38,6 +39,8 @@ require("lazy").setup({
 	{ 'lewis6991/hover.nvim' },
 })
 
+require("wikilinky")
+--require("find_linked_files")
 require("custom_lsp_config")
 require("custom_telescope_config")
 require("custom_terminal_config")
@@ -45,3 +48,13 @@ require("custom_hover_config")
 require('custom_treesitter_config')
 require('custom_nightfox_config')
 require("lsp_lines").setup()
+require("mkdnflow").setup({
+	perspective = {
+		priority='root',
+		root_tell='.git',
+	},
+	links = {
+		style='wiki',
+		conceal=true,
+	}
+})

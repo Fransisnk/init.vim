@@ -1,36 +1,34 @@
 local util = require 'lspconfig/util'
-local cmp = require'cmp'
+local cmp = require 'cmp'
 
 cmp.setup({
-snippet = {
-  -- REQUIRED - you must specify a snippet engine
-  expand = function(args)
-	vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-	-- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-	-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-	-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-  end,
-},
-window = {
-  -- completion = cmp.config.window.bordered(),
-  -- documentation = cmp.config.window.bordered(),
-},
-mapping = cmp.mapping.preset.insert({
-  ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-  ['<C-f>'] = cmp.mapping.scroll_docs(4),
-  ['<C-Space>'] = cmp.mapping.complete(),
-  ['<C-e>'] = cmp.mapping.abort(),
-  ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-}),
-sources = cmp.config.sources({
-  { name = 'nvim_lsp' },
-  { name = 'vsnip' }, -- For vsnip users.
-  -- { name = 'luasnip' }, -- For luasnip users.
-  -- { name = 'ultisnips' }, -- For ultisnips users.
-  -- { name = 'snippy' }, -- For snippy users.
-}, {
-  { name = 'buffer' },
-})
+	snippet = {
+		-- REQUIRED - you must specify a snippet engine
+		expand = function(args)
+			vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+			-- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+			-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+			-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+		end,
+	},
+	window = {
+		-- completion = cmp.config.window.bordered(),
+		-- documentation = cmp.config.window.bordered(),
+	},
+	mapping = cmp.mapping.preset.insert({
+		['<C-b>'] = cmp.mapping.scroll_docs(-4),
+		['<C-f>'] = cmp.mapping.scroll_docs(4),
+		['<C-Space>'] = cmp.mapping.complete(),
+		['<C-e>'] = cmp.mapping.abort(),
+		['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+	}),
+	sources = cmp.config.sources({
+		{ name = 'nvim_lsp' },
+		{ name = 'vsnip' }, -- For vsnip users.
+		{ name = 'wiki_links' },
+	}, {
+		--{ name = 'buffer' },
+	})
 })
 
 -- Mappings.
@@ -76,92 +74,35 @@ local lsp_flags = {
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 require('lspconfig')['pyright'].setup {
-		on_attach = on_attach,
-		capabilities = capabilities,
-		--flags = lsp_flags,
-		settings = { python = { pythonPath = '/usr/bin/python3' } },
+	on_attach = on_attach,
+	capabilities = capabilities,
+	--flags = lsp_flags,
+	settings = { python = { pythonPath = '/usr/bin/python3' } },
 }
 
-require('lspconfig')['tsserver'].setup{
-    on_attach=on_attach,
-    filetypes = {
-        "javascript",
-        "javascriptreact",
-        "javascript.jsx",
-        "typescript",
-        "typescriptreact",
-        "typescript.tsx",
-        "json"
-    },
-    flags = {
-        allow_incremental_sync = true
-    },
-		root_dir = function(fname)
-			local root_files = {
-				'.git',
-				'package.json',
-			}
-			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
-		end,
+require('lspconfig')['tsserver'].setup {
+	on_attach = on_attach,
+	filetypes = {
+		"javascript",
+		"javascriptreact",
+		"javascript.jsx",
+		"typescript",
+		"typescriptreact",
+		"typescript.tsx",
+		"json"
+	},
+	flags = {
+		allow_incremental_sync = true
+	},
+	root_dir = function(fname)
+		local root_files = {
+			'.git',
+			'package.json',
+		}
+		return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
+	end,
 }
 
---[[
-require('lspconfig')['denols'].setup {
-	coq.lsp_ensure_capabilities {
-		init_options = {
-		  enable = true,
-		  lint = false,
-		  unstable = true,
-		  importMap = 'import_map.json'
-		},
-		on_attach = on_attach,
-		flags = lsp_flags,
-		root_dir = function(fname)
-			local root_files = {
-				'.git',
-				'settings.gradle',
-				'ci.yml',
-				'package.json',
-			}
-			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
-		end,
-}}
-require('lspconfig')['tsserver'].setup{
-	coq.lsp_ensure_capabilities {
-		on_attach = on_attach,
-		flags = lsp_flags,
-		cmd = {'typescript-language-server', '--stdio'},
-		root_dir = function(fname)
-			local root_files = {
-				'.git',
-				'package.json',
-			}
-			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
-		end,
-	}
-}
-}
-
-require "lspconfig".eslint.setup{
-		root_dir = function(fname)
-			local root_files = {
-				'.git',
-				'settings.gradle',
-				'ci.yml',
-			}
-			return util.root_pattern(unpack(root_files))(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
-		end,
-  on_attach = function(client, bufnr)
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      buffer = bufnr,
-      command = "EslintFixAll",
-    })
-  end,
-}--]]
-
-
--- local black = require "efm/black"
--- npm install --save-dev --save-exact prettier
 require "lspconfig".efm.setup {
 	on_attach = on_attach,
 	flags = lsp_flags,
@@ -173,11 +114,11 @@ require "lspconfig".efm.setup {
 				{ formatCommand = "black --line-length 120 --quiet -", formatStdin = true }
 			},
 			typescript = {
-				{formatCommand = "npx prettier --stdin-filepath ", formatStdin = true }
+				{ formatCommand = "npx prettier --stdin-filepath ", formatStdin = true }
 			}
 		}
 	},
-    filetypes = { 'python','typescript','lua' }
+	filetypes = { 'python', 'typescript', 'lua' }
 }
 
 require 'lspconfig'.lua_ls.setup {
@@ -196,13 +137,21 @@ require 'lspconfig'.lua_ls.setup {
 				library = vim.api.nvim_get_runtime_file("", true),
 				checkThirdParty = false,
 			},
-		  telemetry = {
-			enable = false,
-		  },
+			telemetry = {
+				enable = false,
+			},
 		},
 	},
 }
+local lsp = require 'lspconfig'
 
+vim.tbl_deep_extend('keep', lsp, {
+	lsp_name = {
+		cmd = { 'vscode-markdown-languageservice' },
+		filetypes = 'md',
+		name = 'mdlsp',
+	}
+})
 
 vim.diagnostic.config({
 	virtual_text = false,
